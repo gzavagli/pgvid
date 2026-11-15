@@ -1,0 +1,52 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pgvid"
+version = "0.1.0"
+description = "Paragliding footage + IGC tracklogs -> YouTube videos with a flight-telemetry HUD"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.10"
+keywords = ["paragliding", "igc", "gopro", "gpmf", "video", "telemetry", "ffmpeg"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: MacOS",
+    "Topic :: Multimedia :: Video",
+]
+dependencies = [
+    "numpy>=1.26",
+    "scipy>=1.11",
+    "opencv-python-headless>=4.8",
+    "pillow>=10.0",
+    "PyYAML>=6.0",
+    "requests>=2.31",
+    "librosa>=0.10",
+    "soundfile>=0.12",
+    "matplotlib>=3.8",
+]
+
+[project.optional-dependencies]
+# Glider detection. NOTE: ultralytics is AGPL-3.0 licensed (see README).
+detect = ["ultralytics>=8.3"]
+# Instrument-clock OCR through Apple's Vision framework (macOS only).
+ocr = [
+    "pyobjc-framework-Vision>=10.0; sys_platform == 'darwin'",
+    "pyobjc-framework-Quartz>=10.0; sys_platform == 'darwin'",
+]
+dev = ["pytest>=8.0"]
+
+[project.scripts]
+pgvid = "pgvid.__main__:main"
+
+[tool.setuptools]
+packages = ["pgvid", "pgvid.providers"]
+
+[tool.setuptools.package-data]
+pgvid = ["assets/fonts/*.ttf", "assets/fonts/OFL.txt"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = ["slow: renders video with ffmpeg"]

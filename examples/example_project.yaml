@@ -1,0 +1,105 @@
+# pgvid example project. Copy this file next to your footage/tracklogs and edit it.
+# Everything here is fictional. Relative paths are resolved against `base_dir`
+# (relative to this file), or against this file's directory if base_dir is unset.
+
+name: example2026                      # used for work/output folder and file names
+# base_dir: ..                         # e.g. keep project YAMLs in a projects/ subfolder
+
+# --- On-screen text (leave any of these empty to hide it) ---------------------
+event: "Example Paragliding Open 2026"
+event_short: "Example Open 2026"
+location: "Nowhere Valley"
+dates: "14-19 July 2026"
+utc_offset_hours: 2                    # local time at the site (used for clocks/OCR)
+
+pilot: "Jane Pilot"                    # lower third, result box; also used to find results
+glider: "Example Wing"
+channel: "@your-channel"               # end-screen call to action
+contact: ""                            # e.g. an email; sent in the map-tile User-Agent
+
+# --- Inputs / outputs ----------------------------------------------------------
+footage_dir: "~/Movies/example2026"    # GoPro GX*.MP4 (+ GL*.LRV proxies) straight from the card
+igc_dir: "input/example2026/igc"       # one IGC per flying day
+music_dir: "input/music"               # royalty-free tracks named "Title - Artist.mp3"
+# work_dir: "work/{name}"              # caches (defaults shown)
+# output_dir: "output/{name}"
+# tasks_dir: "{work_dir}/tasks"
+
+exclude_clips: []                      # e.g. ["GX010123.MP4"] (different camera, unusable)
+
+# --- Competition data (optional) -------------------------------------------------
+# Omit this section for plain cross-country flights: chapters then follow the
+# IGC days ("FLIGHT 1", "FLIGHT 2", ...) and maps show just your track.
+competition:
+  provider: xctsk                      # airtribune | xctsk | manual
+  tasks:
+    - {file: "input/example2026/tasks/day1.xctsk", date: 2026-07-14}
+    - {file: "input/example2026/tasks/day2.xctsk", date: 2026-07-15}
+  # provider: airtribune
+  # results_url: "https://airtribune.com/<competition-slug>/results"
+  # task_ids: [1001, 1002, 1003]
+  # class: open
+  # provider: manual                   # hand-written <tasks_dir>/taskN.yaml (see docs/pipeline.md)
+
+# overall_text: "Final result: 42nd of 120"   # optional extra end-screen line
+
+# --- Look & tools --------------------------------------------------------------
+# fonts:                               # default: bundled Barlow Condensed (OFL)
+#   heavy: ["/System/Library/Fonts/Avenir Next Condensed.ttc", "Heavy"]
+#   bold: ["/System/Library/Fonts/Avenir Next Condensed.ttc", "Bold"]
+#   demi: ["/System/Library/Fonts/Avenir Next Condensed.ttc", "Demi Bold"]
+#   regular: ["/System/Library/Fonts/Avenir Next Condensed.ttc", "Medium"]
+#   num: "/System/Library/Fonts/Supplemental/DIN Alternate Bold.ttf"
+ocr:
+  crop_bottom: 0.45                    # part of the frame (from the bottom) showing the instrument
+  hours: [8, 20]                       # accept clock readings in this local-time window
+detect:                                # needs: pip install "pgvid[detect]"
+  weights: yolo11s.pt
+  device: auto                         # auto | mps | cuda | cpu
+
+# --- Editing -------------------------------------------------------------------
+# Segments forced in after looking at the report (start/dur in clip seconds).
+pins:
+  - {clip: GX010001.MP4, start: 12, dur: 8, category: launch, score: 1.0, note: "launch"}
+# Clip ranges to never use.
+exclude: []
+#  - {clip: GX010005.MP4, start: 0, end: 40}
+
+long:
+  target_seconds: 420
+  # chapter_label: TASK                # default TASK with competition data, FLIGHT without
+  # lower_third: "{glider}|{event_short}"   # '|' separates parts; empty parts are dropped
+  # [track name (file name without extension), start offset in track, chapter index where it starts]
+  music:
+    - ["Calm Morning - Some Artist", 0.0, 0]
+    - ["Big Air - Another Artist", 0.0, 3]
+
+short:
+  music: "Fast Climb - Some Artist"
+  hook: "100 PILOTS.\nONE SKY."
+  outro: "FULL VIDEO\nON MY CHANNEL"
+
+end_screen:
+  heading: "THANKS FOR FLYING ALONG"
+  cta: "SUBSCRIBE  {channel}"
+  lines: ["{event_short}|{location}"]
+
+# --- YouTube package (pgvid metadata) -----------------------------------------
+# Placeholders: {event} {event_short} {location} {dates} {pilot} {glider} {channel}
+#               {n_chapters} {n_tasks} {n_pilots} {results_url}
+youtube:
+  long_title: "{event_short} | {n_tasks} Tasks of Competition Paragliding (Cockpit POV)"
+  long_intro: >-
+    Competition flying at the {event} in {location} ({dates}), filmed from the
+    cockpit of my {glider}.
+  gear: "Gear: action camera on a chest mount · {glider}"
+  notes:
+    - "In-video flight data (altitude, climb rate, ground speed) comes from my IGC tracklogs."
+  result_prefix: "my result"
+  hashtags: "#paragliding #paraglidingcompetition #xcflying"
+  tags: ["paragliding", "paragliding competition", "{event_short}", "XC paragliding", "thermal flying"]
+  short_title: "{n_pilots} pilots, one sky 🪂 {event_short} #Shorts"
+  short_description: "{event_short}: racing through the thermals of {location}. Full video on my channel {channel}."
+  short_hashtags: "#Shorts #paragliding #flying"
+  thumbnail_long: ["{event_short}", "{n_tasks} TASKS · {n_pilots} PILOTS"]
+  thumbnail_short: ["{n_pilots} PILOTS", "ONE SKY"]

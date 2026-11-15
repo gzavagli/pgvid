@@ -1,0 +1,47 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install ffmpeg
+        run: brew install ffmpeg
+      - name: Install pgvid
+        run: pip install -e ".[dev]"
+      - name: Tests (synthetic data only)
+        run: pytest -q
+
+  leaks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Private denylist
+        env:
+          DENYLIST: ${{ secrets.PGVID_DENYLIST }}
+          PGVID_ALLOWED_EMAIL: ${{ vars.PGVID_ALLOWED_EMAIL }}
+        run: |
+          if [ -z "$DENYLIST" ]; then
+            echo "PGVID_DENYLIST secret not available (e.g. a fork PR): skipping"
+            exit 0
+          fi
+          f="$(mktemp)"
+          printf '%s\n' "$DENYLIST" > "$f"
+          PGVID_DENYLIST="$f" scripts/check_leaks.sh --all
+          rm -f "$f"

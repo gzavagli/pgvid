@@ -1,0 +1,20 @@
+# Install once: pip install pre-commit && pre-commit install
+# The denylist hook needs PGVID_DENYLIST (and optionally PGVID_ALLOWED_EMAIL) in your environment.
+repos:
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.21.2   # update with `pre-commit autoupdate`
+    hooks:
+      - id: gitleaks
+  - repo: local
+    hooks:
+      - id: private-denylist
+        name: private denylist
+        entry: scripts/check_leaks.sh
+        language: script
+        pass_filenames: true
+      - id: author-email
+        name: commit author email
+        entry: scripts/check_leaks.sh --email
+        language: script
+        pass_filenames: false
+        always_run: true
