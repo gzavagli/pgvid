@@ -49,7 +49,7 @@ esac
 
 files=()
 if [[ "$mode" == "all" ]]; then
-  while IFS= read -r f; do files+=("$f"); done < <(git ls-files -co --exclude-standard)
+  while IFS= read -r f; do files+=("$f"); done < <(git ls-files)   # tracked/staged only: CI tools drop untracked reports (e.g. results.sarif)
 else
   for f in "$@"; do [[ -f "$f" ]] && files+=("$f"); done
 fi
